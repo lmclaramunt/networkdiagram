@@ -126,7 +126,7 @@ public class NetworkDiagram {
     	}
     }
 	
-	private static void createTree() {
+	public static void createTree() {
     	// add activities
     	nodes = new Activity[activities.size()];
     	
