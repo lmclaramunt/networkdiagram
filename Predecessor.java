@@ -1,4 +1,3 @@
-
 public class Predecessor
 {
 	private String name;

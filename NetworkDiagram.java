@@ -1,5 +1,6 @@
 import java.util.List;
 import java.util.Scanner;
+import java.awt.EventQueue;
 import java.util.Iterator;
 import java.util.LinkedList;
 
@@ -52,7 +53,7 @@ public class NetworkDiagram {
 				    	addActivity(input);
 				    	break;
 				    case "2": 
-				    	createTree();
+				    	//createTree();
 				    	break;
 				    case "3": 
 				    	quit = true;
@@ -64,6 +65,7 @@ public class NetworkDiagram {
 		}
 		System.out.println("Goodbye!");
 	}
+    
 	
 	public static void addActivity(Scanner input)
 	{
@@ -126,13 +128,13 @@ public class NetworkDiagram {
     	}
     }
 	
-	private static void createTree() {
+	public static String createTree(List<Activity> listActivity) {
     	// add activities
-    	nodes = new Activity[activities.size()];
+    	nodes = new Activity[listActivity.size()];
     	
     	// Create Tree
     	int count = 0;
-        for(Activity activity : activities) {
+        for(Activity activity : listActivity) {
             nodes[count] = activity;
             nodes[count].setId(count);
             count++;
@@ -148,24 +150,34 @@ public class NetworkDiagram {
         		}
         	}
         }
-        listPaths();
+        return listPaths() + "\n";
     }
     
-    public static void listPaths() {
+    public static String listPaths() {
         List<List<Activity>> lists = Paths.getPaths(nodes[0]);
+        String output = null;
         for(List<Activity> list : lists) {
             for(int count = 0; count < list.size(); count++) {
-                System.out.print(list.get(count).getName());
+                //System.out.print(list.get(count).getName());
+                output += list.get(count).getName();
                 if(count != list.size() - 1) {
-                    System.out.print("-");
+                    //System.out.print("-");
+                    output += "-";
                 }
             }
-            System.out.println();
+           // System.out.println();
+            output += "\n";
         }
+        return output;
     }
     
     public Iterator<Activity> iterator()
 	{
 		return activities.iterator();
 	}
+    
+    public NetworkDiagram () {
+        activities = new LinkedList<>();
+        nodes = new Activity[100];			//Change size eventually 
+    }
 }
