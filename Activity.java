@@ -96,7 +96,7 @@ public class Activity {
 	
 	public String toString() {
 		String result = "Node: "  + name  + "\nPredecessors: " +
-				printPredecessors() + "\nDuration: " + duration + "\n";				
+				printPredecessors() + "\nDuration: " + duration + "\n_________\n";				
 		return result;
 	}
 }

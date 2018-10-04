@@ -155,7 +155,7 @@ public class NetworkDiagram {
     
     public static String listPaths() {
         List<List<Activity>> lists = Paths.getPaths(nodes[0]);
-        String output = null;
+        String output = "";
         for(List<Activity> list : lists) {
             for(int count = 0; count < list.size(); count++) {
                 //System.out.print(list.get(count).getName());

@@ -37,6 +37,7 @@ public class GUI {
 		frmTeam.setBounds(100, 100, 577, 565);
 		frmTeam.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frmTeam.getContentPane().setLayout(null);
+		frmTeam.setResizable(false);
 		
 		//Labels 		
 		JLabel lblName = new JLabel("Name: ");
@@ -149,24 +150,20 @@ public class GUI {
 	//This class determines what the buttons are actually going to do 
 	private class ButtonListener implements ActionListener{
 		public void actionPerformed(ActionEvent event) {		
-			List<String> predecessors = new ArrayList<String>();
+			List<String> predecessors = new ArrayList<String>();	//Store the predecessors read as strings from the textField
+			boolean errors = false;
 			
-			
+			//Get inputs from the text fields 
 			String nodeName = textFieldName.getText();
 			String getDuration = textFieldDuration.getText();
 			String getPredecessor = textFieldPredecessor.getText();
 			predecessors = Arrays.asList(getPredecessor.split(" "));	//Split the input into multiple strings
 			
-			try {
-	        	   int numberForTesting = Integer.parseInt(getDuration);	//Check if the user entered a number for the duration		
-	           }
-	           catch(NumberFormatException numberForTesting){				
-	        	  //Display error message			
-	           }  
-			//Also, add code to check if the name and/or duration are empty 
-			
+			//Find errors in the inputs
+			errors = findInputErrors();
+	
 			//User clicks enter
-			if (event.getSource() == btnEnter) {
+			if (event.getSource() == btnEnter && errors == false) {
 				Activity newActivity = new Activity(null);
 				newActivity.setName(nodeName);
 				newActivity.setDuration(Integer.parseInt(getDuration));
@@ -176,20 +173,59 @@ public class GUI {
 				
 				activities.add(newActivity);	//Add the new Activity
 				outputCreatedActivities.append(newActivity.toString());
-			}
-			
+			}		
 			//User clicks submit
-			if(event.getSource() == btnSubmit) {
+			if(event.getSource() == btnSubmit && errors == false) {
+				outputSortedPaths.setText(null);
 				outputSortedPaths.append(network.createTree(activities));
 			}
-			
-			if(event.getSource() == btnRestart) {
+			//User click restart
+			if(event.getSource() == btnRestart && errors == false) {
 				activities.clear();		//Work later on clearing the TextArea and TextField
-				
-			}
-				
+				outputCreatedActivities.setText(null);
+				outputSortedPaths.setText(null);				
+			}							
 		}
 	}
 	
+	//Find errors such as missing and invalid information
+	private boolean findInputErrors() {
+		boolean errorFound = false;
+		
+		if (textFieldName.getText().equals("")) {
+			JOptionPane.showMessageDialog(frmTeam, "Pleaser enter a name for the activity", null, JOptionPane.ERROR_MESSAGE);
+			errorFound = true;
+		}
+		//Error if the user does not enter a duration
+		if (textFieldDuration.getText().equals("")) {
+			JOptionPane.showMessageDialog(frmTeam, "Pleaser enter a duration for the activity", null, JOptionPane.ERROR_MESSAGE);
+			errorFound = true;
+		}
+		else {
+			//Check if the user entered a number for the duration	
+			try {
+	        	   Integer.parseInt(textFieldDuration.getText());		
+	           }
+	           catch(NumberFormatException numberForTesting){				
+	        	   JOptionPane.showMessageDialog(frmTeam, "Invalid duration. Please enter an integer", null, JOptionPane.ERROR_MESSAGE);
+	        	   errorFound = true;			
+	           }
+		}
+		
+		
+		
+		return errorFound;
+	}
+	//activities.get(0).predecessors.get(0).getName()
+	private boolean predecessorExist(String name) {
+		boolean exists = false;
+		for (int i = 0; i < activities.size(); i++) {
+			String test = activities.get(i).predecessors.get(i).getName();
+			if (test == name) {
+				exists = true;
+			}
+		}
+		return exists;
+	}
 		
 }
