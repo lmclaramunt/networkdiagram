@@ -84,4 +84,19 @@ public class Activity {
 	{
 		this.duration = duration;
 	}
+	
+	public String printPredecessors(){		
+		String names = new String();
+		for (int i = 0; i < predecessors.size(); i++) {
+			names += predecessors.get(i).getName() + " ";
+		}
+		
+		return names;
+	}
+	
+	public String toString() {
+		String result = "Node: "  + name  + "\nPredecessors: " +
+				printPredecessors() + "\nDuration: " + duration + "\n";				
+		return result;
+	}
 }
