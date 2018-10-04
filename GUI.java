@@ -36,8 +36,6 @@ public class GUI {
 		frmTeam.setTitle("Team 11");
 		frmTeam.setBounds(100, 100, 577, 565);
 		frmTeam.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		frmTeam.getContentPane().setLayout(null);
-		frmTeam.setResizable(false);
 		
 		//Labels 		
 		JLabel lblName = new JLabel("Name: ");
@@ -169,7 +167,11 @@ public class GUI {
 				newActivity.setDuration(Integer.parseInt(getDuration));
 				for(int i = 0; i < predecessors.size(); i++) {			//Add each predecessor
 					newActivity.addPredecessor(predecessors.get(i));
-				}			
+				}
+				//textFieldName.setText("");
+				//textFieldDuration.setText("");
+				//textFieldPredecessor.setText("");
+				
 				
 				activities.add(newActivity);	//Add the new Activity
 				outputCreatedActivities.append(newActivity.toString());
@@ -177,13 +179,16 @@ public class GUI {
 			//User clicks submit
 			if(event.getSource() == btnSubmit && errors == false) {
 				outputSortedPaths.setText(null);
-				outputSortedPaths.append(network.createTree(activities));
+				outputSortedPaths.append(NetworkDiagram.createTree(activities));
 			}
 			//User click restart
 			if(event.getSource() == btnRestart && errors == false) {
-				activities.clear();		//Work later on clearing the TextArea and TextField
+				activities.clear();	
 				outputCreatedActivities.setText(null);
-				outputSortedPaths.setText(null);				
+				outputSortedPaths.setText(null);
+				textFieldName.setText("");
+				textFieldDuration.setText("");
+				textFieldPredecessor.setText("");
 			}							
 		}
 	}
@@ -217,6 +222,7 @@ public class GUI {
 		return errorFound;
 	}
 	//activities.get(0).predecessors.get(0).getName()
+	/*
 	private boolean predecessorExist(String name) {
 		boolean exists = false;
 		for (int i = 0; i < activities.size(); i++) {
@@ -227,5 +233,6 @@ public class GUI {
 		}
 		return exists;
 	}
+	*/
 		
 }
