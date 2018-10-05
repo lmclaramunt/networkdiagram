@@ -99,5 +99,14 @@ public class Activity {
 				printPredecessors() + "\nDuration: " + duration + "\n____________\n";				
 		return result;
 	}
-
+	/*
+	 public void addChild(Activity child) {
+	        this.children.add(child);
+	        child.setParent(this);
+	    }
+	    
+	public int addDuration(Activity child) {
+			return 0;
+	}
+	*/
 }
