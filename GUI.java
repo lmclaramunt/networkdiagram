@@ -12,6 +12,8 @@ import java.awt.event.ActionEvent;
 import java.awt.Color;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 
 public class GUI {
@@ -23,8 +25,8 @@ public class GUI {
 	private List<Activity> activities;
 	private int justOnce = 0;
 	
-	public GUI(List<Activity> listActivity) {
-		this.activities = listActivity;
+	public GUI() {
+		activities = new LinkedList<>();
 		
 		frmTeam = new JFrame();
 		frmTeam.setTitle("Path Analysis");

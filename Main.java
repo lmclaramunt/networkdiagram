@@ -1,12 +1,7 @@
-import java.util.LinkedList;
-import java.util.List;
 
 public class Main {
 	public static void main(String[] args) {
-		List<Activity> activityList = new LinkedList<>();
-		GUI window = new GUI(activityList);
+		GUI window = new GUI();
 		window.frmTeam.setVisible(true);
 	}
-	
-	
 }
