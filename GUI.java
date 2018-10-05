@@ -1,11 +1,8 @@
-import java.awt.EventQueue;
-
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
-
 import java.awt.Font;
 import javax.swing.JTextField;
 import javax.swing.JButton;
@@ -13,11 +10,8 @@ import javax.swing.ImageIcon;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 import java.awt.Color;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.LinkedList;
 import java.util.List;
 
 public class GUI {
@@ -27,15 +21,17 @@ public class GUI {
 	private JTextArea outputCreatedActivities, outputSortedPaths;
 	private JButton btnRestart, btnAbout, btnEnter, btnSubmit, btnHelp;
 	private List<Activity> activities;
-	private NetworkDiagram network;		//Might or might not need it 
+	private int justOnce = 0;
 	
 	public GUI(List<Activity> listActivity) {
 		this.activities = listActivity;
 		
 		frmTeam = new JFrame();
-		frmTeam.setTitle("Team 11");
+		frmTeam.setTitle("Path Analysis");
 		frmTeam.setBounds(100, 100, 577, 565);
 		frmTeam.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		frmTeam.getContentPane().setLayout(null);
+		frmTeam.setResizable(false);
 		
 		//Labels 		
 		JLabel lblName = new JLabel("Name: ");
@@ -146,6 +142,7 @@ public class GUI {
 	}
 	
 	//This class determines what the buttons are actually going to do 
+//This class determines what the buttons are actually going to do 
 	private class ButtonListener implements ActionListener{
 		public void actionPerformed(ActionEvent event) {		
 			List<String> predecessors = new ArrayList<String>();	//Store the predecessors read as strings from the textField
@@ -158,37 +155,40 @@ public class GUI {
 			predecessors = Arrays.asList(getPredecessor.split(" "));	//Split the input into multiple strings
 			
 			//Find errors in the inputs
-			errors = findInputErrors();
+			
 	
 			//User clicks enter
 			if (event.getSource() == btnEnter && errors == false) {
+				errors = findInputErrors();
 				Activity newActivity = new Activity(null);
 				newActivity.setName(nodeName);
 				newActivity.setDuration(Integer.parseInt(getDuration));
 				for(int i = 0; i < predecessors.size(); i++) {			//Add each predecessor
 					newActivity.addPredecessor(predecessors.get(i));
 				}
-				//textFieldName.setText("");
-				//textFieldDuration.setText("");
-				//textFieldPredecessor.setText("");
-				
-				
-				activities.add(newActivity);	//Add the new Activity
-				outputCreatedActivities.append(newActivity.toString());
+				if (errors == false) {
+					activities.add(newActivity);	//Add the new Activity
+					outputCreatedActivities.append(newActivity.toString());			
+					textFieldName.setText("");
+					textFieldDuration.setText("");
+					textFieldPredecessor.setText("");
+				}
 			}		
 			//User clicks submit
-			if(event.getSource() == btnSubmit && errors == false) {
+			if(event.getSource() == btnSubmit && activities.size() != 0 && justOnce == 0) {		//justOnce is here if we want to allow the user to submit it only once
 				outputSortedPaths.setText(null);
 				outputSortedPaths.append(NetworkDiagram.createTree(activities));
+				//justOnce = 1;
 			}
 			//User click restart
-			if(event.getSource() == btnRestart && errors == false) {
-				activities.clear();	
+			if(event.getSource() == btnRestart) {
+				activities.clear();		//Work later on clearing the TextArea and TextField
 				outputCreatedActivities.setText(null);
 				outputSortedPaths.setText(null);
 				textFieldName.setText("");
 				textFieldDuration.setText("");
 				textFieldPredecessor.setText("");
+				//justOnce = 1;
 			}							
 		}
 	}
@@ -196,6 +196,15 @@ public class GUI {
 	//Find errors such as missing and invalid information
 	private boolean findInputErrors() {
 		boolean errorFound = false;
+		//Check if the predecessor exist 
+		if (alreadyExists(textFieldPredecessor.getText()) == false && textFieldPredecessor.getText().isEmpty() == false) {
+			JOptionPane.showMessageDialog(frmTeam, "One of the dependencies entered does not exist", null, JOptionPane.ERROR_MESSAGE);
+			errorFound = true;
+		}
+		if (alreadyExists(textFieldName.getText()) == true) {
+			JOptionPane.showMessageDialog(frmTeam, "An activity under that name already exists. Please choose another one", null, JOptionPane.ERROR_MESSAGE);
+			errorFound = true;
+		}
 		
 		if (textFieldName.getText().equals("")) {
 			JOptionPane.showMessageDialog(frmTeam, "Pleaser enter a name for the activity", null, JOptionPane.ERROR_MESSAGE);
@@ -216,23 +225,21 @@ public class GUI {
 	        	   errorFound = true;			
 	           }
 		}
-		
-		
-		
+				
 		return errorFound;
 	}
-	//activities.get(0).predecessors.get(0).getName()
-	/*
-	private boolean predecessorExist(String name) {
+	//activities.get(i).getName()
+	
+	private boolean alreadyExists(String name) {
 		boolean exists = false;
+		String test = null;
 		for (int i = 0; i < activities.size(); i++) {
-			String test = activities.get(i).predecessors.get(i).getName();
-			if (test == name) {
+			test = activities.get(i).getName();
+			if (name.equalsIgnoreCase(test)) {
 				exists = true;
 			}
-		}
+		}		
 		return exists;
 	}
-	*/
 		
-}
+} 
