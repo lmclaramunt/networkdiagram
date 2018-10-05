@@ -21,7 +21,6 @@ public class GUI {
 	private JTextArea outputCreatedActivities, outputSortedPaths;
 	private JButton btnRestart, btnAbout, btnEnter, btnSubmit, btnHelp;
 	private List<Activity> activities;
-	private int justOnce = 0;
 	
 	public GUI(List<Activity> listActivity) {
 		this.activities = listActivity;
@@ -175,7 +174,7 @@ public class GUI {
 				}
 			}		
 			//User clicks submit
-			if(event.getSource() == btnSubmit && activities.size() != 0 && justOnce == 0) {		//justOnce is here if we want to allow the user to submit it only once
+			if(event.getSource() == btnSubmit && activities.size() != 0) {		
 				outputSortedPaths.setText(null);
 				outputSortedPaths.append(NetworkDiagram.createTree(activities));
 				//justOnce = 1;
