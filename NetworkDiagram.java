@@ -1,15 +1,15 @@
 import java.util.List;
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 
 public class NetworkDiagram {
-	static Activity[] nodes;
-    static List<Activity> activities;
+    private static List<Activity> activities;
 	
 	public static String createTree(List<Activity> listActivity) {
     	// add activities
 		activities = listActivity;
-    	nodes = new Activity[activities.size()];
+		Collections.sort(activities);
+		Activity[] nodes = new Activity[activities.size()];
     	
     	// Create Tree
     	int count = 0;
@@ -18,7 +18,6 @@ public class NetworkDiagram {
             nodes[count].setId(count);
             count++;
         }
-        
         
         // Add predecessors as parents
         for(Activity node : nodes) {
@@ -32,9 +31,8 @@ public class NetworkDiagram {
         	}
         }
         return listPaths();
-    }
-    
-    public static String listPaths() {
+        
+        // ListPaths
         List<List<Activity>> lists = Paths.getPaths(nodes[0]);
         ArrayList<Integer> pathsDuration = Paths.pathDuration(lists);
         String output = "";
@@ -52,9 +50,8 @@ public class NetworkDiagram {
         }
         return output;
     }
-    
-    public Iterator<Activity> iterator()
-	{
-		return activities.iterator();
+   
+    public Iterator<Activity> iterator() {
+		  return activities.iterator();
 	}   
 }
