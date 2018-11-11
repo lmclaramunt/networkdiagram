@@ -54,12 +54,13 @@ public class GUI {
 
 	public JFrame frmTeam;
 	private JTextField textFieldName, textFieldPredecessor, textFieldDuration;
+	private JLabel lblName, lblDependencies, lblDuration;
 	private JTextArea outputCreatedActivities, outputSortedPaths;
 	public static JButton btnRestart, btnAbout, btnEnter, btnSubmit, btnHelp, btnQuit, btnExport, btnEdit;
 	public static JComboBox <String> choice;
 	private List<Activity> activities;
 	private List<String> stringActivities;
-	public boolean  criticalOnly, submitted = false;
+	public boolean  criticalOnly, error, submitted = false;
 	
 	public GUI() {
 		activities = new LinkedList<>();
@@ -72,17 +73,17 @@ public class GUI {
 		frmTeam.setResizable(false);
 		
 		//Labels 		
-		JLabel lblName = new JLabel("Name: ");
+		lblName = new JLabel("Name: ");
 		lblName.setBounds(27, 62, 120, 40);
 		lblName.setFont(new Font("Tahoma", Font.PLAIN, 18));
 		frmTeam.getContentPane().add(lblName);
 		
-		JLabel lblDependencies = new JLabel("Dependencies:");
+		lblDependencies = new JLabel("Dependencies:");
 		lblDependencies.setFont(new Font("Tahoma", Font.PLAIN, 18));
 		lblDependencies.setBounds(27, 168, 120, 40);
 		frmTeam.getContentPane().add(lblDependencies);
 		
-		JLabel lblDuration = new JLabel("Duration:");
+		lblDuration = new JLabel("Duration:");
 		lblDuration.setFont(new Font("Tahoma", Font.PLAIN, 18));
 		lblDuration.setBounds(27, 274, 120, 40);
 		frmTeam.getContentPane().add(lblDuration);
@@ -205,6 +206,7 @@ public class GUI {
 		btnSubmit.addActionListener(listener);
 		btnRestart.addActionListener(listener);
 		btnQuit.addActionListener(listener);
+		btnEdit.addActionListener(listener);
 		choice.addActionListener(listener);
 		
 		//About button already has an action  
@@ -273,7 +275,7 @@ public class GUI {
 	
 			//User clicks enter
 			if (event.getSource() == btnEnter && errors == false) {
-				errors = findInputErrors();
+				errors = findInputErrors(false);
 				Activity newActivity = new Activity(null);
 				newActivity.setName(nodeName);
 				newActivity.setDuration(Integer.parseInt(getDuration));
@@ -293,13 +295,34 @@ public class GUI {
 				btnEnter.setVisible(false);
 				btnEdit.setVisible(true);
 				outputSortedPaths.setText(null);
-				try {
-					outputSortedPaths.append(Network.printNetwork(activities, criticalOnly));
-				} catch (Exception e) {
-					outputSortedPaths.append(e.getMessage());
-				}
+				printSortedActivities(activities, criticalOnly);
+				
+				frmTeam.remove(textFieldPredecessor);		//The user can only enter the name and new duration. Dependencies option removed
+				frmTeam.remove(lblDependencies);
+				frmTeam.repaint();
 				submitted = true;
 			}
+					
+			if(event.getSource() == btnEdit) { 			
+				error = findInputErrors(true);					//Find errors. Like user not entering an integer, etc
+				if (error == false) {
+				for (int i = 1; i < activities.size(); i++) {
+					if (activities.get(i).getName().equals(nodeName)) {
+						activities.get(i).setDuration(Integer.parseInt(getDuration));
+						error = false;				//
+					}			
+				}									
+				textFieldName.setText("");
+				textFieldDuration.setText("");
+				outputCreatedActivities.setText("");
+				outputSortedPaths.setText("");				
+				printnewActivities(activities);						//Refresh the activities created
+				printSortedActivities(activities, criticalOnly);	//Refresh the sorted paths
+				}	
+				
+			}
+					
+			
 			//User click restart
 			if(event.getSource() == btnRestart) {
 				btnEnter.setVisible(true);
@@ -310,6 +333,9 @@ public class GUI {
 				textFieldName.setText("");
 				textFieldDuration.setText("");
 				textFieldPredecessor.setText("");
+				frmTeam.add(textFieldPredecessor);		//Dependencies options are restored
+				frmTeam.add(lblDependencies);
+				frmTeam.repaint();
 				//justOnce = 1;
 			}
 			
@@ -322,14 +348,7 @@ public class GUI {
 				}
 				if (submitted == true) {					//If the activities have been already submitted
 					outputSortedPaths.setText("");
-					try
-					{
-						outputSortedPaths.append(Network.printNetwork(activities, criticalOnly));
-					} catch (Exception e)
-					{
-						outputSortedPaths.append(e.getMessage());
-					}
-					
+					printSortedActivities(activities, criticalOnly);		//Print the sorted paths again	
 				}			
 			}
 			
@@ -341,14 +360,18 @@ public class GUI {
 	}
 	
 	//Find errors such as missing and invalid information
-	private boolean findInputErrors() {
+	private boolean findInputErrors(boolean edit) {
 		boolean errorFound = false;
-		if (alreadyExists(textFieldName.getText()) == true) {
-			JOptionPane.showMessageDialog(frmTeam, "An activity under that name already exists. Please choose another one", null, JOptionPane.ERROR_MESSAGE);
+		if (alreadyExists(textFieldName.getText()) == true && edit == false) {
+			JOptionPane.showMessageDialog(frmTeam, "An activity under that name already exists. You can edit them once they are submitted.", null, JOptionPane.ERROR_MESSAGE);
 			errorFound = true;
 		}
-		
-		if (textFieldName.getText().equals("")) {
+		//When the activities are being edited a different message is displayed
+		if (alreadyExists(textFieldName.getText()) == false && edit == true) {
+			JOptionPane.showMessageDialog(frmTeam, "The activity entered does not exist.", null, JOptionPane.ERROR_MESSAGE);
+			errorFound = true;
+		}
+		else if (textFieldName.getText().equals("")) {
 			JOptionPane.showMessageDialog(frmTeam, "Pleaser enter a name for the activity", null, JOptionPane.ERROR_MESSAGE);
 			errorFound = true;
 		}
@@ -357,6 +380,7 @@ public class GUI {
 			JOptionPane.showMessageDialog(frmTeam, "Pleaser enter a duration for the activity", null, JOptionPane.ERROR_MESSAGE);
 			errorFound = true;
 		}
+		
 		else {
 			//Check if the user entered a number for the duration	
 			try {
@@ -372,14 +396,33 @@ public class GUI {
 	
 	private boolean alreadyExists(String name) {
 		boolean exists = false;
-		String test = null;
 		for (int i = 0; i < activities.size(); i++) {
-			test = activities.get(i).getName();
-			if (name.equalsIgnoreCase(test)) {
+			if (name.equalsIgnoreCase(activities.get(i).getName())) {
 				exists = true;
 			}
 		}		
 		return exists;
 	}
-		
+	
+	//Print activities edited
+	public void printnewActivities(List<Activity> listActivities) {	
+		List<Activity> newList = new LinkedList<Activity>();
+			for (Activity a: listActivities) {
+				if (!a.getName().equals("SECRETSTARTNODE")) {
+					newList.add(a);				
+				}				
+			}
+		outputCreatedActivities.append(newList.toString());
+	}
+	
+	//Print paths after the activities were edited
+	public void printSortedActivities(List<Activity> listActivities, boolean critical) {
+		try
+		{
+			outputSortedPaths.append(Network.printNetwork(listActivities, critical));
+		} catch (Exception e)
+		{
+			outputSortedPaths.append(e.getMessage());
+		}
+	}
 } 
