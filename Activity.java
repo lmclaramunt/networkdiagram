@@ -82,7 +82,9 @@ public class Activity implements Comparable<Activity> {
 	public String printPredecessors() {		
 		String names = new String();
 		for (int i = 0; i < predecessors.size(); i++) {
-			names += predecessors.get(i) + " ";
+			if(!(predecessors.get(i).equals("SECRETSTARTNODE"))) {
+				names += predecessors.get(i) + " ";
+			}
 		}
 		return names;
 	}
@@ -92,6 +94,14 @@ public class Activity implements Comparable<Activity> {
 				printPredecessors() + "\nDuration: " + duration + "\n____________\n";				
 		return result;
 	}
+	
+	public String newToString() {
+		String result = "Node: "  + name  + " \nPredecessors: " +
+				printPredecessors() + "\nDuration: " + duration + "\n____________\n";				
+		return result;
+		
+	}
+	
 	
 	public int compareTo(Activity i) { return this.predecessors.size() - i.predecessors.size(); }
 	
