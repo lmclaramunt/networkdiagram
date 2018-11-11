@@ -8,22 +8,61 @@ import javax.swing.JTextField;
 import javax.swing.JButton;
 import javax.swing.ImageIcon;
 import java.awt.event.ActionListener;
+import java.io.FileNotFoundException;
+import java.io.PrintWriter;
+import java.text.SimpleDateFormat;
 import java.awt.event.ActionEvent;
 import java.awt.Color;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
+import java.awt.Choice;
+import javax.swing.JComboBox;
 
+/**
+ * <center>
+ * <table cellpadding="5" cellspacing="5">
+ *  <tr>
+ *  <td valign="top">
+ *   Course: CSE 360<br>
+ *   Section Line Number: 89049<br>
+ *   Project: Activity Network<br>
+ *  </td>
+ *  
+ *  <td valign="top">
+ *   Contributor: Anthony Benites,<br>
+ *   Arizona State Univeristy<br>
+ *  </td>
+ * 
+ *  <td valign="top">
+ *   Contributor: Luis Claramunt <br>
+ *   Arizona State Univeristy<br>
+ *  </td>
+ * 
+ * <td valign="top">
+ *   Contributor: Enrique Almaraz<br>
+ *   Arizona State Univeristy<br>
+ *  </td>
+ *  </tr>
+ * </table>
+ * </center>
+ */
 public class GUI {
 
 	public JFrame frmTeam;
 	private JTextField textFieldName, textFieldPredecessor, textFieldDuration;
 	private JTextArea outputCreatedActivities, outputSortedPaths;
-	private JButton btnRestart, btnAbout, btnEnter, btnSubmit, btnHelp;
+	public static JButton btnRestart, btnAbout, btnEnter, btnSubmit, btnHelp, btnQuit, btnExport, btnEdit;
+	public static JComboBox <String> choice;
 	private List<Activity> activities;
+	private List<String> stringActivities;
+	public boolean  criticalOnly, submitted = false;
 	
-	public GUI(List<Activity> listActivity) {
-		this.activities = listActivity;
+	public GUI() {
+		activities = new LinkedList<>();
 		
 		frmTeam = new JFrame();
 		frmTeam.setTitle("Path Analysis");
@@ -52,11 +91,6 @@ public class GUI {
 		lblPreview.setFont(new Font("Tahoma", Font.PLAIN, 18));
 		lblPreview.setBounds(225, 76, 180, 26);
 		frmTeam.getContentPane().add(lblPreview);
-		
-		JLabel lblSortedPath = new JLabel("Sorted Paths:");
-		lblSortedPath.setFont(new Font("Tahoma", Font.PLAIN, 18));
-		lblSortedPath.setBounds(225, 270, 140, 26);
-		frmTeam.getContentPane().add(lblSortedPath);
 		
 		//TextFields
 		textFieldName = new JTextField();
@@ -93,34 +127,96 @@ public class GUI {
 		scrollPanel2.setBounds(225, 300, 300, 150);
 		frmTeam.getContentPane().add(scrollPanel2);
 		
+		//Combo Box
+		String[] pathChoice = new String[] {"All Paths", "Critical Paths"};
+
+		choice = new JComboBox<String>(pathChoice);
+		choice.setBounds(377, 270, 148, 26);
+		frmTeam.getContentPane().add(choice);
+		choice.setVisible(true);
+		choice.setSelectedItem(0);
+		
 		//Buttons
 		btnEnter = new JButton("Enter");
 		btnEnter.setFont(new Font("Tahoma", Font.PLAIN, 15));
-		btnEnter.setBounds(27, 480, 97, 25);
+		btnEnter.setBounds(27, 424, 97, 25);
 		frmTeam.getContentPane().add(btnEnter);
+		
+		btnEdit = new JButton("Edit");
+		btnEdit.setFont(new Font("Tahoma", Font.PLAIN, 15));
+		btnEdit.setBounds(27, 424, 97, 25);
+		frmTeam.getContentPane().add(btnEdit);
 		
 		btnSubmit = new JButton("Submit");
 		btnSubmit.setFont(new Font("Tahoma", Font.PLAIN, 15));
-		btnSubmit.setBounds(238, 481, 97, 25);
+		btnSubmit.setBounds(27, 481, 97, 25);
 		frmTeam.getContentPane().add(btnSubmit);
 	
 		btnRestart = new JButton("Restart");
 		btnRestart.setFont(new Font("Tahoma", Font.PLAIN, 15));
-		btnRestart.setBounds(450, 481, 97, 25);
+		btnRestart.setBounds(161, 481, 97, 25);
 		frmTeam.getContentPane().add(btnRestart);
+		
+		btnQuit = new JButton("Quit");
+		btnQuit.setFont(new Font("Tahoma", Font.PLAIN, 15));
+		btnQuit.setBounds(425, 481, 97, 25);
+		frmTeam.getContentPane().add(btnQuit);
+		
+		btnExport = new JButton("Export");
+		btnExport.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				String reportName = JOptionPane.showInputDialog("What is the name of your report? \nYour file will be saved as [report_name].txt");
+				try (PrintWriter out = new PrintWriter(reportName.replace("/", "-") + ".txt")) {
+					String dateTime = new SimpleDateFormat("yyyy/MM/dd_HH:mm:ss").format(Calendar.getInstance().getTime());
+				    out.println("Title: " + reportName + "\n"); 
+		    		out.println("\nDate & Time: "  + dateTime +"\n");
+		    		
+		    		// Print activities in alphabetical order
+		    		String activityOutput = "";
+		    		stringActivities = new LinkedList<>();
+		    		for (Activity a : activities) {
+		    			if (a.getName()!="SECRETSTARTNODE") {
+		    				stringActivities.add(a.getName());
+		    			}
+		    		}
+		    		Collections.sort(stringActivities);
+		    		for (String sa : stringActivities) {
+		    			for (Activity a : activities) {
+		    				if (a.getName()==sa) {
+		    					activityOutput+=a.getName() + ": " + a.getDuration() + ",\n";
+		    				}
+		    			}
+		    		}
+		    		out.println("\nActivities:\n" + activityOutput +"\n");
+		    		out.println("\nPaths:\n" + outputSortedPaths.getText() + "\n" /*+paths*/);
+				} catch (FileNotFoundException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+			}
+		});
+		btnExport.setFont(new Font("Tahoma", Font.PLAIN, 15));
+		btnExport.setBounds(297, 481, 97, 25);
+		frmTeam.getContentPane().add(btnExport);
 		
 		//Add action Listeners
 		ActionListener listener = new ButtonListener();
 		btnEnter.addActionListener(listener);
 		btnSubmit.addActionListener(listener);
 		btnRestart.addActionListener(listener);
+		btnQuit.addActionListener(listener);
+		choice.addActionListener(listener);
 		
 		//About button already has an action  
 		btnAbout = new JButton("");
 		btnAbout.setForeground(Color.BLACK);
+		JLabel about = new JLabel("<html>About: <br>Hello and welcome to our Path Analysis application. This program finds relations between <br>existing nodes " 
+				+ "based on the dependencies that exist between them.<br><br>The main functionality of the program is to find all the paths between<br>the existing nodes," 
+				+ "calculate their duration, and sort them in a descending order based on it.");
+		about.setFont(new Font("Tahoma", Font.PLAIN, 18));
 		btnAbout.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-				JOptionPane.showMessageDialog(frmTeam, "FAQ: \n 1. This is a test \n 2. This is a test \n 3. This is a test", null, JOptionPane.INFORMATION_MESSAGE);
+				JOptionPane.showMessageDialog(null,about,"ABOUT",JOptionPane.INFORMATION_MESSAGE);
 			}
 		});
 		
@@ -130,18 +226,37 @@ public class GUI {
 		frmTeam.getContentPane().add(btnAbout);
 		
 		btnHelp = new JButton("Help");
+		JLabel help = new JLabel("<html>Help:<br>This application interface takes in three different inputs, and all are needed to proceed:<br>" + 
+				"<br>" + 
+				"<b>Name</b>: The name of this activity.<br>" + 
+				"<br>" + 
+				"<b>Duration</b>: The duration of this activity.<br>" + 
+				"<br>" + 
+				"<b>Dependencies</b>: The dependencies that this activity related to.<br>" + 
+				"<br>" + 
+				"<b>On the right-hand side:</b> there is a preview feature that displays all current node data when the button Submit is entered. <br>" + 
+				"<br>" + 
+				"<b>Restart button:</b> clears all the information that the user has previously entered<br>" +
+				"<br>" +
+				"<b>Enter button:</b> allows the user to enter in the currently filled text boxes as an activity");
+		help.setFont(new Font("Tahoma", Font.PLAIN, 18));
 		btnHelp.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				JOptionPane.showMessageDialog(frmTeam, "About: \n Hello and Welcome to Team 11's CSE 360 Project", null, JOptionPane.INFORMATION_MESSAGE);
+				JOptionPane.showMessageDialog(null,help,"HELP",JOptionPane.INFORMATION_MESSAGE);
 			}
 		});
 		
 		btnHelp.setBounds(462, 0, 97, 25);
 		frmTeam.getContentPane().add(btnHelp);
+		
+		JLabel lblSortedPath = new JLabel("Sorted Paths:");
+		lblSortedPath.setFont(new Font("Tahoma", Font.PLAIN, 18));
+		lblSortedPath.setBounds(225, 270, 140, 26);
+		frmTeam.getContentPane().add(lblSortedPath);
+		
 	}
 	
 	//This class determines what the buttons are actually going to do 
-//This class determines what the buttons are actually going to do 
 	private class ButtonListener implements ActionListener{
 		public void actionPerformed(ActionEvent event) {		
 			List<String> predecessors = new ArrayList<String>();	//Store the predecessors read as strings from the textField
@@ -174,13 +289,21 @@ public class GUI {
 				}
 			}		
 			//User clicks submit
-			if(event.getSource() == btnSubmit && activities.size() != 0) {		
+			if(event.getSource() == btnSubmit && activities.size() != 0) {		//justOnce is here if we want to allow the user to submit it only once
+				btnEnter.setVisible(false);
+				btnEdit.setVisible(true);
 				outputSortedPaths.setText(null);
-				outputSortedPaths.append(NetworkDiagram.createTree(activities));
-				//justOnce = 1;
+				try {
+					outputSortedPaths.append(Network.printNetwork(activities, criticalOnly));
+				} catch (Exception e) {
+					outputSortedPaths.append(e.getMessage());
+				}
+				submitted = true;
 			}
 			//User click restart
 			if(event.getSource() == btnRestart) {
+				btnEnter.setVisible(true);
+				btnEdit.setVisible(false);
 				activities.clear();		//Work later on clearing the TextArea and TextField
 				outputCreatedActivities.setText(null);
 				outputSortedPaths.setText(null);
@@ -188,18 +311,38 @@ public class GUI {
 				textFieldDuration.setText("");
 				textFieldPredecessor.setText("");
 				//justOnce = 1;
-			}							
+			}
+			
+			if (event.getSource() == choice) {				//Determine what is selected in the drop down menu
+				JComboBox<String> cb = (JComboBox<String>)event.getSource();
+				String display = (String)cb.getSelectedItem();
+				switch(display) {
+				case "All Paths": criticalOnly = false; break;
+				case "Critical Paths": criticalOnly = true; break;
+				}
+				if (submitted == true) {					//If the activities have been already submitted
+					outputSortedPaths.setText("");
+					try
+					{
+						outputSortedPaths.append(Network.printNetwork(activities, criticalOnly));
+					} catch (Exception e)
+					{
+						outputSortedPaths.append(e.getMessage());
+					}
+					
+				}			
+			}
+			
+			
+			if(event.getSource()==btnQuit) {
+				System.exit(0);
+			}
 		}
 	}
 	
 	//Find errors such as missing and invalid information
 	private boolean findInputErrors() {
 		boolean errorFound = false;
-		//Check if the predecessor exist 
-		if (alreadyExists(textFieldPredecessor.getText()) == false && textFieldPredecessor.getText().isEmpty() == false) {
-			JOptionPane.showMessageDialog(frmTeam, "One of the dependencies entered does not exist", null, JOptionPane.ERROR_MESSAGE);
-			errorFound = true;
-		}
 		if (alreadyExists(textFieldName.getText()) == true) {
 			JOptionPane.showMessageDialog(frmTeam, "An activity under that name already exists. Please choose another one", null, JOptionPane.ERROR_MESSAGE);
 			errorFound = true;
@@ -217,17 +360,15 @@ public class GUI {
 		else {
 			//Check if the user entered a number for the duration	
 			try {
-	        	   Integer.parseInt(textFieldDuration.getText());		
-	           }
-	           catch(NumberFormatException numberForTesting){				
-	        	   JOptionPane.showMessageDialog(frmTeam, "Invalid duration. Please enter an integer", null, JOptionPane.ERROR_MESSAGE);
-	        	   errorFound = true;			
-	           }
+				   Integer.parseInt(textFieldDuration.getText());		
+			 }
+			 catch(NumberFormatException numberForTesting) {				
+				 JOptionPane.showMessageDialog(frmTeam, "Invalid duration. Please enter an integer", null, JOptionPane.ERROR_MESSAGE);
+				 errorFound = true;			
+			 }
 		}
-				
 		return errorFound;
 	}
-	//activities.get(i).getName()
 	
 	private boolean alreadyExists(String name) {
 		boolean exists = false;
