@@ -95,14 +95,6 @@ public class Activity implements Comparable<Activity> {
 		return result;
 	}
 	
-	public String newToString() {
-		String result = "Node: "  + name  + " \nPredecessors: " +
-				printPredecessors() + "\nDuration: " + duration + "\n____________\n";				
-		return result;
-		
-	}
-	
-	
 	public int compareTo(Activity i) { return this.predecessors.size() - i.predecessors.size(); }
 	
 	public List<Activity> getChildren() { return Collections.unmodifiableList(this.children); }
